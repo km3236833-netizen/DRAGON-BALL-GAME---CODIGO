@@ -6,14 +6,14 @@ class Acciones extends Personaje{
     }
 
     atkBasico(rival){
-        this.setEnergia(parseInt(this.getEnergia() - 5));
-        this.setKi(parseInt(this.getKi() - 10));
+        this.setEnergia(Math.max(0, parseInt(this.getEnergia() - 5)));
+        this.setKi(Math.max(0, parseInt(this.getKi() - 10)));
         this.mostrarEstadisticas();
     }
 
     atkEspecial(rival){
-        this.setEnergia(parseInt(this.getEnergia() - 15));
-        this.setKi(parseInt(this.getKi() - 20));
+        this.setEnergia(Math.max(0, parseInt(this.getEnergia() - 15)));
+        this.setKi(Math.max(0, parseInt(this.getKi() - 20)));
         this.mostrarEstadisticas();
     }
 

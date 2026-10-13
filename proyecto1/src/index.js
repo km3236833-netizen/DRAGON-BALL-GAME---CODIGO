@@ -28,9 +28,13 @@ let jugador1, jugador2;
 // --- Sistema de turnos ---
 const MAX_ESPECIALES = 2;
 const TURNOS_ENTRE_ESPECIALES = 2;
-const ENFRIAMIENTO_INICIAL = TURNOS_ENTRE_ESPECIALES - 1; 
+const ENFRIAMIENTO_INICIAL = TURNOS_ENTRE_ESPECIALES - 1;
 
 const MAX_SEMILLAS = 2;
+
+// Ki mínimo necesario para atacar
+const KI_BASICO = 10;
+const KI_ESPECIAL = 20;
 
 let turnoActual = 1;
 let partidaTerminada = false;
@@ -149,7 +153,7 @@ const revisarAlertas = (jugador) => {
             });
         }, 1600);
     }
-    if (jugador.getKi() <= 20 && jugador.getKi() > 0) {
+    if (jugador.getKi() <= 20) {
         setTimeout(() => {
             Swal.fire({
                 icon: "warning",
@@ -212,11 +216,12 @@ const reiniciarJuego = () => {
     actualizarBotonesTurno();
 }
 
+// La partida termina SOLO cuando la vida de alguien llega a 0
 const revisarFinPartida = () => {
     if (partidaTerminada) return;
 
-    const j1Perdio = jugador1.getVida() <= 0 || jugador1.getKi() <= 0;
-    const j2Perdio = jugador2.getVida() <= 0 || jugador2.getKi() <= 0;
+    const j1Perdio = jugador1.getVida() <= 0;
+    const j2Perdio = jugador2.getVida() <= 0;
 
     if (!j1Perdio && !j2Perdio) return;
 
@@ -347,10 +352,14 @@ btn_player2.addEventListener("click", () => {
     }
 });
 
+// ============ BOTONES JUGADOR 1 ============
 
-botonesP1[0].addEventListener("click", async () => { 
+botonesP1[0].addEventListener("click", async () => { // ATK Basico
     if (!jugador1 || !jugador2 || turnoActual !== 1) return;
-    await atkBasico(jugador1, jugador2); 
+    if (jugador1.getKi() < KI_BASICO) {
+        return msj_error("No tienes Ki suficiente para atacar. ¡Usa Carga KI!");
+    }
+    await atkBasico(jugador1, jugador2);
     actualizarBarras(jugador1);
     actualizarBarras(jugador2);
     revisarAlertas(jugador1);
@@ -368,6 +377,9 @@ botonesP1[1].addEventListener("click", async () => { // ATK Especial
     if (enfriamientoJ1 > 0) {
         return msj_error("Debes esperar un turno para volver a usar el ataque especial.");
     }
+    if (jugador1.getKi() < KI_ESPECIAL) {
+        return msj_error("Necesitas al menos 20 de Ki para el ataque especial.");
+    }
     especialesJ1--;
     await atkEspecial(jugador1, jugador2);
     actualizarBarras(jugador1);
@@ -379,7 +391,7 @@ botonesP1[1].addEventListener("click", async () => { // ATK Especial
     pasarTurno(true);
 });
 
-botonesP1[2].addEventListener("click", () => { 
+botonesP1[2].addEventListener("click", () => { // Carga KI
     if (!jugador1 || turnoActual !== 1) return;
     if (jugador1.getEnergia() >= 100 && jugador1.getKi() >= 100) {
         return msj_error("¡Ya tienes el Ki y la energía al máximo!");
@@ -389,7 +401,7 @@ botonesP1[2].addEventListener("click", () => {
     pasarTurno();
 });
 
-botonesP1[3].addEventListener("click", () => { 
+botonesP1[3].addEventListener("click", () => { // Semilla
     if (!jugador1 || turnoActual !== 1) return;
     if (semillasJ1 <= 0) {
         return msj_error("Ya no te quedan semillas del ermitaño.");
@@ -407,6 +419,9 @@ botonesP1[3].addEventListener("click", () => {
 
 botonesP2[0].addEventListener("click", async () => { // ATK Basico
     if (!jugador1 || !jugador2 || turnoActual !== 2) return;
+    if (jugador2.getKi() < KI_BASICO) {
+        return msj_error("No tienes Ki suficiente para atacar. ¡Usa Carga KI!");
+    }
     await atkBasico(jugador2, jugador1);
     actualizarBarras(jugador1);
     actualizarBarras(jugador2);
@@ -424,6 +439,9 @@ botonesP2[1].addEventListener("click", async () => { // ATK Especial
     }
     if (enfriamientoJ2 > 0) {
         return msj_error("Debes esperar un turno para volver a usar el ataque especial.");
+    }
+    if (jugador2.getKi() < KI_ESPECIAL) {
+        return msj_error("Necesitas al menos 20 de Ki para el ataque especial.");
     }
     especialesJ2--;
     await atkEspecial(jugador2, jugador1);
